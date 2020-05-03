@@ -55,6 +55,7 @@ pip install -r requirements.txt
 python -m main
 ```
 
+## Demostración de la Apliación:
 
-
+![pokedex-example](https://user-images.githubusercontent.com/37983099/80898754-c1bfa200-8ccc-11ea-9544-452af2226de9.gif)
 

@@ -1,6 +1,8 @@
 # Python Workshop Toga and API pokeDex
 
-La aplicación fue desarrollada en ***python*** y con la libreria ***toga***.
+La aplicación fue desarrollada en ***python*** y con la libreria ***toga***,  
+y usando el API de [POKE-API](https://pokeapi.co/)
+
 
 ##  Pasos para ejecutar la Apliación :page_facing_up:
 
@@ -55,7 +57,11 @@ python -m main
 ```
 
 ## Demostración de la Apliación:
-
+### Sin paginación:
 ![pokedex-example](https://user-images.githubusercontent.com/37983099/80898754-c1bfa200-8ccc-11ea-9544-452af2226de9.gif)
+
+
+### Con paginación:
+![poker-v2-gif](https://user-images.githubusercontent.com/37983099/81120850-1f353800-8ef3-11ea-895d-d8043db47e5d.gif)
 
 > Proyecto realizado en base al siguiente taller: [Taller de interfaces gráficas con Python](https://codigofacilito.com/cursos/python-toga)

@@ -15,12 +15,15 @@ class PokeDex(toga.App):
         self.heading = ['Name']
         self.data = list()
 
+        self.offset = 0  # Inicio de pokemonos en pokeapi
+
         self.response_name = ''
         self.response_description = ''
         self.response_sprite = ''
 
         self.create_elements()
         self.load_async_data()
+        self.validate_previous_command()
 
     def startup(self):
         self.main_window = toga.MainWindow("main", title=self.title, 
@@ -37,13 +40,14 @@ class PokeDex(toga.App):
         # information_area.add(self.image_view)  
         # information_area.add(self.pokemon_name)
         # information_area.add(self.pokemon_description)
-
+        
+        self.main_window.toolbar.add(self.previous_command, self.next_command)
+        
         split = toga.SplitContainer()
         split.content = [self.table, information_area]
 
+        #self.main_window.content = split        
         self.main_window.content = split
-        self.commands.add(self.previous_command, self.next_command)
-        self.main_window.toolbar.add(self.previous_command, self.next_command)
         
 
         self.main_window.show()
@@ -51,7 +55,7 @@ class PokeDex(toga.App):
     def create_elements(self):
         self.create_table()
         self.create_toolbar()
-        self.create_image(PIDGEY_ICON)        
+        self.create_image(PIKACHU_ICON)        
         self.create_labels()
 
     def create_toolbar(self):
@@ -59,11 +63,12 @@ class PokeDex(toga.App):
         self.create_previous_command()     
 
     def create_next_command(self):
-        self.next_command = toga.Command(self.next, label='Next', tooltip='Next',
-                                        icon=BULBASAUR_ICON)
+        self.next_command = toga.Command(self.next, label='Next', tooltip='Siguientes',
+                                        icon=NEXT_ICON)
+    
     def create_previous_command(self):
-        self.previous_command = toga.Command(self.previous, label='Previous', tooltip='Next',
-                                        icon=METAPOD_ICON)
+        self.previous_command = toga.Command(self.previous, label='Previous', tooltip='Anteriores',
+                                        icon=BACK_ICON)
 
     def create_table(self):
         self.table = toga.Table(self.heading, data = self.data,
@@ -76,8 +81,8 @@ class PokeDex(toga.App):
         self.image_view = toga.ImageView(image,style=style)
 
     def create_labels(self):
-        styleName = Pack(text_align=CENTER, font_size=50, padding_bottom = 10)
-        styleDescription = Pack(text_align=CENTER)
+        styleName = Pack(text_align=CENTER, font_size=20, padding_bottom = 30)
+        styleDescription = Pack(text_align=CENTER, padding_bottom = 30)
         self.pokemon_name = toga.Label('Name', style=styleName)
         self.pokemon_description = toga.Label('Description', style=styleDescription)
 
@@ -85,15 +90,20 @@ class PokeDex(toga.App):
         # self.pokemon_name.style.padding_bottom = 10
 
     def load_async_data(self):
+        self.data.clear()  # Limpiar lista de Pokemons
+        self.table.data = self.data  # Limpiar elemento seleccionado en la tabla
         thread = threading.Thread(target=self.load_data)
         thread.start()
+        thread.join()
 
-        pass
+        self.table.data = self.data  # Pasar infomacion de la peticion a PokerApi
+
     
-    def load_data(self):
-        path = 'https://pokeapi.co/api/v2/pokemon-form?offset=0&limit=1200'
+    def load_data(self):   
+        path = 'https://pokeapi.co/api/v2/pokemon-form?offset={}&limit=20'.format(self.offset)
         
-        response = requests.get(path,verify=False)
+        #response = requests.get(path,verify=False)   #En caso de error con la peticion
+        response = requests.get(path)
 
         if response:
             result = response.json()
@@ -102,7 +112,7 @@ class PokeDex(toga.App):
                 name = pokemon['name']
                 self.data.append(name)
 
-        self.table.data = self.data
+        
 
     def load_async_pokemon(self, pokemon):
         thread = threading.Thread(target=self.load_pokemon, args=[pokemon])
@@ -114,6 +124,7 @@ class PokeDex(toga.App):
         self.pokemon_description.text = self.response_description
 
     def load_pokemon(self, pokemon):
+        
         path = 'https://pokeapi.co/api/v2/pokemon/{}/'.format(pokemon)
 
         response = requests.get(path)
@@ -137,10 +148,30 @@ class PokeDex(toga.App):
 #CALLBACKS
 
     def next(self, widget):
-        print("Next")
+        self.offset +=1
+
+        self.handler_command(widget)
+
+        #print("Next  "+ str(self.offset))       
 
     def previous(self, widget):
-        print("Previous")
+        self.offset -=1  
+
+        self.handler_command(widget)
+
+        #print("Previous " + str(self.offset))
+
+    def handler_command(self, widget):
+        widget.enable = False
+
+        self.load_async_data()
+
+        widget.enable = True
+
+        self.validate_previous_command()        
+
+    def validate_previous_command(self):
+        self.previous_command.enabled = not self.offset == 0        
 
     def select_element(self, widget, row):
         if row:
